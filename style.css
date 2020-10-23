@@ -1,0 +1,21 @@
+header {
+  background-color: powderblue;
+  color: black;
+  height: 5%;
+  font-size: 22px;
+  width: 36%;
+  padding-top: 1px;
+  padding-bottom: 1px;
+}
+
+body {
+  background-color: white;
+}
+
+h1 {
+  font-family: sans-serif;
+}
+
+.sendAndReceive{
+  font-size: 18px;
+}

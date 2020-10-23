@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Web app skeleton</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="style.css">
+  </head>
+
+  <body>
+    <header>
+      <h1 class="site-title">Mobile Robot Package Delivery</h1>
+    </header>
+
+    <div class="sendAndReceive">
+      <h1>Sender and Receiver Selection</h1>
+      <p>Please enter a sender</p>
+      <input type="text" id="fname" name="fname">
+      <p>Please enter a receiver</p>
+      <input type="text" id="fname" name="fname">
+      <br><br>
+      <input type="submit" value="Submit">
+    </div>
+
+    <h1>Live camera feed</h1>
+
+    <!-- Add a placeholder for the Twitch embed -->
+    <div id="twitch-embed"></div>
+
+    <!-- Load the Twitch embed script -->
+    <script src="https://embed.twitch.tv/embed/v1.js"></script>
+
+    <!-- Create a Twitch.Embed object that will render within the "twitch-embed" root element. -->
+    <script type="text/javascript">
+      new Twitch.Embed("twitch-embed", {
+        width: 426,
+        height: 240,
+        channel: "monstercat"
+      });
+    </script>
+
+    <div class="gpsTracking">
+      <h1>Live GPS Tracking</h1>
+    </div>
+
+  </body>
+</html>
