@@ -12,16 +12,65 @@
 
   <body>
     <header>
+      <IMG SRC="logo.png" ALT="some text" WIDTH=100 HEIGHT=100>
       <h1><a href="/">Mobile Robot Package Delivery</a></h1>
     </header>
 
     <div class="bar">
-      <h2>Status: Unavailable</h2>
-      <button id="Login">Login</button>
-      <button id="adminButton">Admin</button>
+      <h2 id="statusNotifcation">Status: Offline</h2>
+      <button id="Login"><a href="/">Login</a></button>
+      <button id="adminButton"><a href="/admin.html">Admin</a></button>
+      <button id="updateStatus" onclick="updateStatus()">Update Status</button>
     </div>
 
-    <!-- Movement stuff here -->
+    <script>
+    function updateStatus() {
+      // 0 = Ready for Delivery
+      // 1 = On Delivery
+      // 2 = Delivery Complete
+
+      var status;
+      // Testing
+      var currentPosition = [1, 2];
+      var endPosition = [1, 1];
+      var lastPosition = [1, 2];
+
+      // Get current and end position
+
+      // If robot has not moved since last check
+      if(currentPosition[0] == endPosition[0] && currentPosition[1] == endPosition[1]){
+        status = 2;
+        document.getElementById("statusNotifcation").innerHTML = "Status: Delivery Complete"
+        document.getElementById("statusNotifcation").style.color = "Yellow";
+        return status;
+      }
+      if(currentPosition[0] == lastPosition[0] && currentPosition[1] == lastPosition[1]){
+        status = 0;
+        document.getElementById("statusNotifcation").innerHTML = "Status: Ready for Delivery"
+        document.getElementById("statusNotifcation").style.color = "Green";
+        return status;
+      }
+      if(currentPosition[0] != lastPosition[0] || currentPosition[1] != lastPosition[1]){
+        status = 1;
+        document.getElementById("statusNotifcation").innerHTML = "Status: On Delivery"
+        document.getElementById("statusNotifcation").style.color = "Red";
+        return status;
+      }
+      // Update lastPosition to currentPosition
+    }
+    </script>
+
+    <!-- Movement Buttons-->
+    <div class="movement">
+      <button id="up">Forward</button>
+      </br>
+      <button id="left">Left</button>
+      <button id="right">Right</button>
+      </br>
+      <button id="down">Back</button>
+      </br>
+      <button id="stop">Stop</button>
+    </div>
 
   </body>
 </html>

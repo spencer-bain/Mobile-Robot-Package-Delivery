@@ -6,30 +6,91 @@
     <meta name="viewport" content="width=device-width">
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.19.0.min.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <link rel="stylesheet" href="style1.css">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="style1.css">
   </head>
 
   <body>
     <header>
+      <IMG SRC="logo.png" ALT="OSU logo" WIDTH=100 HEIGHT=100>
       <h1><a href="/">Mobile Robot Package Delivery</a></h1>
     </header>
 
     <div class="bar">
-      <h2>Status: Unavailable</h2>
+      <h2 id="statusNotifcation">Status: Offline</h2>
       <button id="Login"><a href="/">Login</a></button>
       <button id="adminButton"><a href="/admin.html">Admin</a></button>
     </div>
 
+    <script>
+    function getStatus() {
+      // 0 = Ready for Delivery
+      // 1 = On Delivery
+      // 2 = Delivery Complete
+
+      var status;
+      // Testing
+      var currentPosition = [1, 2];
+      var endPosition = [1, 1];
+      var lastPosition = [1, 2];
+
+      // Get current and end position
+
+      // If robot has not moved since last check
+      if(currentPosition[0] == endPosition[0] && currentPosition[1] == endPosition[1]){
+        status = 2;
+        document.getElementById("statusNotifcation").innerHTML = "Status: Delivery Complete"
+        document.getElementById("statusNotifcation").style.color = "Yellow";
+        return status;
+      }
+      if(currentPosition[0] == lastPosition[0] && currentPosition[1] == lastPosition[1]){
+        status = 0;
+        document.getElementById("statusNotifcation").innerHTML = "Status: Ready for Delivery"
+        document.getElementById("statusNotifcation").style.color = "Green";
+        return status;
+      }
+      if(currentPosition[0] != lastPosition[0] || currentPosition[1] != lastPosition[1]){
+        status = 1;
+        document.getElementById("statusNotifcation").innerHTML = "Status: On Delivery"
+        document.getElementById("statusNotifcation").style.color = "Red";
+        return status;
+      }
+      // Update lastPosition to currentPosition
+    }
+
+    function submitClick() {
+      // Get submitted data of receiver
+      var receiverFName = document.getElementById("fname").value
+      var receiverLName = document.getElementById("lname").value
+      var receiverEmail = document.getElementById("email").value
+      console.log(receiverFName);
+      console.log(receiverLName);
+      console.log(receiverEmail);
+
+      var status = getStatus();
+      if(status == 0){
+        // Run SQL queries
+        alert("Ready for delivery");
+      }
+      else{
+        alert("Error: Robot is not ready");
+      }
+
+    }
+    </script>
+
     <div class="sendAndReceive">
       <h1>Receiver Selection</h1>
       <p>Please enter a receiver</p>
-      <input type="text" id="fname" name="fname" placeholder="Receiver">
-      <br>
-      <input type="submit" value="Submit">
+      <input type="text" id="fname" name="fname" placeholder="First Name">
+      <input type="text" id="lname" name="lname" placeholder="Last Name">
+      <input type="text" id="email" name="email" placeholder="Email">
+      <input type="submit" id="submitBtn"  onclick="submitClick()" value="Submit">
     </div>
 
-    <h1>Live camera feed</h1>
+
+
+    <h1 id="cameraText">Live camera feed</h1>
 
     <!-- Add a placeholder for the Twitch embed -->
     <div id="twitch-embed"></div>
@@ -53,7 +114,7 @@
           <div id="map-canvas"></div>
       </div>
     </div>
-    <!--
+
     <script>
     // Map starting coordinates
     window.lat = 44.565702;
@@ -132,10 +193,10 @@
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyA3ZuPyZ58gTWHJuVpyj9ZWGOiZHNfQa1w&callback=initialize">
     </script>
-    -->
+
 
     <!-- Testing script -->
-    <!--
+
     <script>
     function newPoint(time) {
           var r = 0.0001;
@@ -147,17 +208,5 @@
           pubnub.publish({channel:pnChannel, message:newPoint()});
           }, 500);
     </script>
-    -->
-
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <br/>
-  <br/>
   </body>
 </html>
