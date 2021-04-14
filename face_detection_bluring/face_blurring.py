@@ -5,10 +5,10 @@
 #import openCV into project
 import cv2
 
-
-# To use a video file as input
-# code is a little different
-#video = cv2.VideoCapture("me.mp4")
+#import time into project to sync framerate
+import time
+#import subprocess into project to create and manage stream pipe
+import subprocess as sp
 
 # This will return a live video from the webcam on your computer.
 video = cv2.VideoCapture(0)
@@ -16,22 +16,43 @@ video = cv2.VideoCapture(0)
 # We need to check if camera opened
 # if it is not, program sends error message
 if not video.isOpened():
-    print("Error reading video file")
+    print("Error opening camera")
+    exit()
 
 
 # need to set the resolutions
 # .get(3) and .get(4) gives 640x480 by default
 frame_width = int(video.get(3))
 frame_height = int(video.get(4))
-
 size = (frame_width, frame_height)
 
+##What the maximum fps can be
+TARGET_FPS = 5
 
-# VideoWriter object will create a frame of above defined image
-# The output is stored in 'blur_faces_output_file.avi' file.
-result = cv2.VideoWriter('blur_faces_output_file.avi',
-                         cv2.VideoWriter_fourcc(*'MJPG'), 10, size)
+##stream url including stream key
+rtmp_url = "rtmp://live.justin.tv/app/live_670152613_4f0j8ldoKHml5nQJ7fRSG3of5mkWeg"
 
+##Command for stream pipe
+command = ["ffmpeg",
+	   "-y",
+	   "-f", "rawvideo",
+	   "-vcodec", "rawvideo",
+	   "-pix_fmt", "bgr24",
+	   "-s", "{}x{}".format(frame_width, frame_height),
+	   "-r", str(TARGET_FPS),
+	   "-i", "-",
+	   "-c:v", "libx264",
+	   "-pix_fmt", "yuv420p",
+	   "-preset", "ultrafast",
+	   "-f", "flv",
+	   rtmp_url]
+##Open pipe
+proc = sp.Popen(command, stdin=sp.PIPE)
+
+##Start frame rate tracker
+frame_start = time.time()
+
+#Main loop
 while (True):
 
     # read in the video and capture frame-by-frame
@@ -56,7 +77,6 @@ while (True):
 
     # rectangle will use these to locate and draw rectangles around the detected objects in the input image/video.
     for (x, y, w, h) in faces:
-
         # blurred faces
         # Select the detected face area
         face_color = frame[y:y + h, x:x + w]
@@ -67,11 +87,12 @@ while (True):
     # if there is a frame read in
     if ret:
 
-        # Write the frame into the file face_detector_output_file.avi'
-        result.write(frame)
-
         # Display the updated frame as a video stream
+        ## I don't think we need this past testing
         cv2.imshow('Frame', frame)
+
+        # Write out to pipe
+        proc.stdin.write(frame.tobytes())
 
         # Press the ESC key to exit the loop
         # 27 is the code for the ESC key
@@ -82,12 +103,14 @@ while (True):
     else:
         break
 
+    # Wait to preserve frame rate (Might be able to change to sleep or something)
+    while time.time() - frame_start < 1 / TARGET_FPS:
+        pass
+    frame_start = time.time()
+
 # When everything done, release the video capture and video write objects
 video.release()
 result.release()
 
 # Destroy the window that was showing the video stream
 cv2.destroyAllWindows()
-
-# print success message to console
-print("The video was successfully saved")
