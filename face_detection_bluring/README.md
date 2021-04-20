@@ -41,3 +41,9 @@ The above is just for reference, this file is included in this repository
 
 To compile the program in the terminal type 
 "python face_blurring.py"
+
+## For streaming:
+ 
+System need ffmpeg installed
+"sudo apt update"
+"sudo apt install ffmpeg"
