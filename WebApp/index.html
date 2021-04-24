@@ -18,9 +18,48 @@
 
     <div class="bar">
       <h2 id="statusNotifcation">Status: Offline</h2>
-      <button id="Login"><a href="/">Login</a></button>
+      <button id="Login"onclick="document.getElementById('id01').style.display='block'">Login</button>
       <button id="adminButton"><a href="/admin.html">Admin</a></button>
     </div>
+
+    <!-- The Modal -->
+    <div id="id01" class="modal">
+      <span onclick="document.getElementById('id01').style.display='none'"
+    class="close" title="Close Modal">&times;</span>
+
+      <!-- Modal Content -->
+      <form class="modal-content animate">
+        <div class="login-container">
+          <label for="email"><b>Email</b></label>
+          <input type="text" id="loginEmail" placeholder="Enter email" name="email" required>
+
+          <label for="psw"><b>Password</b></label>
+          <input type="password" id="loginPwd" placeholder="Enter password" name="psw" required>
+
+          <button type="submit">Login</button>
+          <label>
+            <input type="checkbox" checked="checked" name="remember"> Remember me
+          </label>
+        </div>
+
+        <div class="cancel-container" style="background-color:#f1f1f1">
+          <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+          <span class="psw">Forgot <a href="#">password?</a></span>
+        </div>
+      </form>
+    </div>
+
+    <script>
+    // Get the modal
+    var modal = document.getElementById('id01');
+
+    // When the user clicks anywhere outside of the modal, close it
+    window.onclick = function(event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+    </script>
 
     <script>
     function getStatus() {
@@ -77,6 +116,26 @@
       }
 
     }
+
+    function auth(){
+      // Get data from input boxes
+      var receiverFName = document.getElementById("fname").value
+      var receiverLName = document.getElementById("lname").value
+      var receiverEmail = document.getElementById("email").value
+      // Split receiver email
+      var authCheck = receiverEmail.split("@");
+      // set emailCheck to everything after "@"
+      var emailCheck = authCheck[1];
+
+      if (emailCheck == "oregonstate.edu"){
+        // if email matches, display name
+        console.log("Verified");
+        document.getElementById("statusNotifcation").innerHTML = receiverFName + " " + receiverLName;
+      }
+      else{
+        alert("Not authorized");
+      }
+    }
     </script>
 
     <div class="sendAndReceive">
@@ -85,7 +144,14 @@
       <input type="text" id="fname" name="fname" placeholder="First Name">
       <input type="text" id="lname" name="lname" placeholder="Last Name">
       <input type="text" id="email" name="email" placeholder="Email">
-      <input type="submit" id="submitBtn"  onclick="submitClick()" value="Submit">
+      <input list="locations">
+      <datalist id="locations">
+        <option value="NW">
+        <option value="SW">
+        <option value="SE">
+        <option value="NE">
+      </datalist>
+      <input type="submit" id="submitBtn"  onclick="auth()" value="Submit">
     </div>
 
 
@@ -100,7 +166,7 @@
 
     <div class="iframe-container">
       <iframe
-        src="https://player.twitch.tv/?channel=spencerbain&parent=localhost"
+        src="https://player.twitch.tv/?channel=osu_mobile_delivery_robot&parent=localhost"
         height="480"
         width="854"
         class="frame">
@@ -192,21 +258,6 @@
     });
     </script>
     <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&key=AIzaSyA3ZuPyZ58gTWHJuVpyj9ZWGOiZHNfQa1w&callback=initialize">
-    </script>
-
-
-    <!-- Testing script -->
-
-    <script>
-    function newPoint(time) {
-          var r = 0.0001;
-          var x = Math.random() * r;
-          var y = Math.random() * r;
-          return {lat:window.lat + y, lng:window.lng + x};
-            }
-          setInterval(function() {
-          pubnub.publish({channel:pnChannel, message:newPoint()});
-          }, 500);
     </script>
   </body>
 </html>
