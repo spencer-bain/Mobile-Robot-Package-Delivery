@@ -42,7 +42,7 @@ a:hover{
   /* margin-top: -535px;
   margin-right: -225px; */
   margin-top: -27.5%;
-  margin-right: -11.5%;
+  margin-right: -20%;
 }
 
 .container > h1{
@@ -51,12 +51,12 @@ a:hover{
 
 .container > button{
   display: inline-block;
-  margin-left: 275px;
+  margin-left: 10px;
 }
 
 #map-canvas{
-    width: 850px;
-    height: 480px;
+    width: 555px;
+    height: 350px;
     border: 6px;
 }
 

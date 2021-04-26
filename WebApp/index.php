@@ -27,7 +27,7 @@
     <div class="bar">
       <h2 id="statusNotifcation">Status: Offline</h2>
       <button id="Login"onclick="document.getElementById('id01').style.display='block'">Login</button>
-      <button id="adminButton"><a href="/admin.html">Admin</a></button>
+      <button id="adminButton"><a href="/admin.php">Admin</a></button>
     </div>
 
     <!-- The Modal -->
@@ -172,8 +172,8 @@
     <div class="sendAndReceive">
       <h1>Sender Selection</h1>
       <p>Please select your location</p>
-      <input list="locations">
-      <datalist id="locations">
+      <input list="SenderLocations">
+      <datalist id="SenderLocations">
         <option value="NW">
         <option value="SW">
         <option value="SE">
@@ -238,6 +238,9 @@
     };
 
     window.initialize = initialize;
+
+    // Resizing
+    google.maps.addDomListener(window, resize, initialize);
 
     // Function to update the map
     var redraw = function(payload)
