@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <?php
+    // Connect to database
+    try{
+      require_once 'dbConn.php';
+    } catch (Exception $ex) {
+      $error = $ex->getMessage();
+    }
+    ?>
     <title>MRPD Homepage</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
@@ -61,6 +69,25 @@
     }
     </script>
 
+    <?php
+    $i = 0;
+    // Get email of users in database
+    $sql = "SELECT * FROM users";
+    $result = $db_conn->query($sql);
+
+    // Display emails
+    if ($result->num_rows > 0){
+      while($row = $result->fetch_assoc()){
+        $data[] = $row[email];
+      }
+      // for($i = 0; $i <= $result->num_rows; $i++){
+      //   print_r($data[$i]);
+      //   echo "<br>";
+    } else {
+      echo "No results";
+    }
+    ?>
+
     <script>
     function getStatus() {
       // 0 = Ready for Delivery
@@ -118,27 +145,40 @@
     }
 
     function auth(){
-      // Get data from input boxes
-      var receiverFName = document.getElementById("fname").value
-      var receiverLName = document.getElementById("lname").value
+      // Get email from input box
       var receiverEmail = document.getElementById("email").value
-      // Split receiver email
-      var authCheck = receiverEmail.split("@");
-      // set emailCheck to everything after "@"
-      var emailCheck = authCheck[1];
 
-      if (emailCheck == "oregonstate.edu"){
-        // if email matches, display name
-        console.log("Verified");
-        document.getElementById("statusNotifcation").innerHTML = receiverFName + " " + receiverLName;
+      // Get authorized emails from database
+      var passedArray = <?php echo json_encode($data); ?>;
+
+      // Check inputted email against database
+      var flag = 0;
+      for(var x = 0; x < passedArray.length; x++){
+        if(receiverEmail == passedArray[x]){
+          flag = 1;
+        }
       }
-      else{
+      if(flag == 1){
+        alert("Selection aurthorized");
+        var receiverFname = document.getElementById("Fname").value
+        var receiveLname = document.getElementById("Lname").value
+        var receiverLocation = document.getElementById("locations").value
+      } else{
         alert("Not authorized");
       }
     }
     </script>
 
     <div class="sendAndReceive">
+      <h1>Sender Selection</h1>
+      <p>Please select your location</p>
+      <input list="locations">
+      <datalist id="locations">
+        <option value="NW">
+        <option value="SW">
+        <option value="SE">
+        <option value="NE">
+      </datalist>
       <h1>Receiver Selection</h1>
       <p>Please enter a receiver</p>
       <input type="text" id="fname" name="fname" placeholder="First Name">
