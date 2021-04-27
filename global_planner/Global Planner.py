@@ -7,6 +7,10 @@ import time
 ##GPS coordinate calclations
 from geographiclib.geodesic import Geodesic
 
+##SQl stuff
+import sqlite3
+from sqlite3 import Error
+
 ##For testing
 import random
 
@@ -61,6 +65,8 @@ def fill_gap(coord1, coord2):
     total_dist = dist(coord1, coord2)
     # Get the number of sub waypoints there should be
     waypoint_number = ceil(total_dist / MAX_DIST_BETWEEN_GPS_WAYPOINTS) - 1
+    if waypoint_number == -1:
+        return [coord1]
     # Get the dist between each sub waypoint
     waypoint_dist = total_dist / (waypoint_number + 1)
     # Start of path
@@ -124,7 +130,7 @@ class graph:
         """
         lat = inf
         for n in self.nodes:
-            if n.coordinate[0] < lat:
+            if n and n.coordinate[0] < lat:
                 lat = n.coordinate[0]
         return lat
     def get_max_lat(self):
@@ -133,7 +139,7 @@ class graph:
         """
         lat = -inf
         for n in self.nodes:
-            if n.coordinate[0] > lat:
+            if n and n.coordinate[0] > lat:
                 lat = n.coordinate[0]
         return lat
     def get_min_long(self):
@@ -142,7 +148,7 @@ class graph:
         """
         long = inf
         for n in self.nodes:
-            if n.coordinate[1] < long:
+            if n and n.coordinate[1] < long:
                 long = n.coordinate[1]
         return long
     def get_max_long(self):
@@ -151,7 +157,7 @@ class graph:
         """
         long = -inf
         for n in self.nodes:
-            if n.coordinate[1] > long:
+            if n and n.coordinate[1] > long:
                 long = n.coordinate[1]
         return long
 
@@ -175,7 +181,7 @@ class graph:
         closest = None
         closest_dist = inf
         for n in self.nodes:
-            if dist(n.coordinate, coord) < closest_dist:
+            if n and dist(n.coordinate, coord) < closest_dist:
                 closest = self.nodes.index(n)
                 closest_dist = dist(n.coordinate, coord)
         return closest
@@ -240,6 +246,7 @@ class graph:
 
         # Get the nodes that form a higher level path
         path = self.path_between_nodes(starting_node, ending_node)
+        print(path)
 
         # If a valid path was found
         if path:
@@ -328,6 +335,40 @@ def load_graph_from_file(file):
             g.add_connection(int(i[0]), int(i[1]))
 
     return g
+
+def create_connection(db_file):
+    """ create a database connection to a SQLite database """
+    conn = None
+    try:
+        conn = sqlite3.connect(db_file)
+        return conn
+    except Error as e:
+        print(e)
+    return None
+def load_graph_from_database(db_file):
+    """
+    Loads graph data from db file
+    """
+    ##Create graph
+    g = graph()
+
+    ##Connect to database (or create if it doesn't exist)
+    connection = create_connection(db_file)
+    cursor = connection.cursor()
+
+    ##Create nodes
+    nodes = cursor.execute("SELECT * FROM Nodes").fetchall()
+    g.nodes = [None] * (len(nodes) + 1)
+    for row in nodes:
+        g.nodes[row[0]] = node(float(row[1]), float(row[2]))
+
+    ##Create conections
+    connections = cursor.execute("SELECT * FROM Connections").fetchall()
+    for row in connections:
+        g.add_connection(int(row[0]), int(row[1]))
+
+    return g
+
 ##For testing
 def random_node_in_graph(graph):
     """
@@ -349,7 +390,8 @@ CLOSE_ENOUGH = 0.5
 
 if __name__ == "__main__":
     # Get graph from database
-    g = load_graph_from_file("test coords.txt")
+    ##g = load_graph_from_file("test coords.txt")
+    g = load_graph_from_database("test_lite.db")
     # Create simulator (for testing)
     robot = movement_simulator(g.get_min_lat(), g.get_max_lat(), g.get_min_long(), g.get_max_long())
 
