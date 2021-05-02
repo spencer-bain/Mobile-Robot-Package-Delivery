@@ -5,7 +5,7 @@
 
 $db_host = '127.0.0.1';
 $db_user = "root";        // User of database ("Leon" on Hanna's Pi)
-$db_password = "pwd";     // Password of database (Hanna's Pi password)
+$db_password = "1349rainbow";     // Password of database (Hanna's Pi password)
 $db_name = "mydatabase";
 $db_port = '3306';
 

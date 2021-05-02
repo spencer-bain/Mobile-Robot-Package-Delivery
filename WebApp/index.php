@@ -144,6 +144,24 @@
 
     }
 
+    function getCoordFromLocation(location){
+      if (location === "NW"){
+        location = "44.566213, -123.279874";
+        return location;
+      }else if (location === "NE"){
+        location = "44.566215, -123.477897";
+        return location;
+      }else if (location === "SE"){
+        location = "44.566252, -123.277948";
+        return location;
+      }else if (location === "SW"){
+        location = "44.565269, -123.279874";
+        return location;
+      }else{
+        return NULL;
+      }
+    }
+
     function auth(){
       // Get email from input box
       var receiverEmail = document.getElementById("email").value
@@ -160,9 +178,17 @@
       }
       if(flag == 1){
         alert("Selection aurthorized");
-        var receiverFname = document.getElementById("Fname").value
-        var receiveLname = document.getElementById("Lname").value
-        var receiverLocation = document.getElementById("locations").value
+        // Get inputs
+        var receiverFname = document.getElementById("fname").value
+        var receiveLname = document.getElementById("lname").value
+        // Get location inputs
+        var senderLocation = document.getElementById("SenderLocations").value
+        var receiverLocation = document.getElementById("ReceiverLocation").value
+        // Convert locations to coordinates (lat, lng)
+        senderLocation = getCoordFromLocation(senderLocation);
+        receiverLocation = getCoordFromLocation(receiverLocation);
+        // Get coordinates to global planner
+        
       } else{
         alert("Not authorized");
       }
@@ -172,25 +198,26 @@
     <div class="sendAndReceive">
       <h1>Sender Selection</h1>
       <p>Please select your location</p>
-      <input list="SenderLocations">
-      <datalist id="SenderLocations">
-        <option value="NW">
-        <option value="SW">
-        <option value="SE">
-        <option value="NE">
-      </datalist>
+      <label for="SenderLocations">Select a location:</label>
+      <select name="SenderLocations" id="SenderLocations">
+        <option value="NW">NW</option>
+        <option value="SW">SW</option>
+        <option value="SE">SE</option>
+        <option value="NE">NE</option>
+      </select>
+
       <h1>Receiver Selection</h1>
       <p>Please enter a receiver</p>
       <input type="text" id="fname" name="fname" placeholder="First Name">
       <input type="text" id="lname" name="lname" placeholder="Last Name">
       <input type="text" id="email" name="email" placeholder="Email">
-      <input list="locations">
-      <datalist id="locations">
-        <option value="NW">
-        <option value="SW">
-        <option value="SE">
-        <option value="NE">
-      </datalist>
+      <label for="ReceiverLocation">Select a location:</label>
+      <select name="SenderLocations" id="ReceiverLocation">
+        <option value="NW">NW</option>
+        <option value="SW">SW</option>
+        <option value="SE">SE</option>
+        <option value="NE">NE</option>
+      </select>
       <input type="submit" id="submitBtn"  onclick="auth()" value="Submit">
     </div>
 
@@ -240,7 +267,7 @@
     window.initialize = initialize;
 
     // Resizing
-    google.maps.addDomListener(window, resize, initialize);
+    // google.maps.addDomListener(window, resize, initialize);
 
     // Function to update the map
     var redraw = function(payload)
