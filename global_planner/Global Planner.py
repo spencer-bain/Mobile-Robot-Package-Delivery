@@ -11,6 +11,10 @@ from geographiclib.geodesic import Geodesic
 import sqlite3
 from sqlite3 import Error
 
+##ROS stuff only if in ros
+if __name__ != "__main__":
+    import rospy
+
 ##For testing
 import random
 
@@ -375,7 +379,6 @@ def random_node_in_graph(graph):
     Gets a random coordinate from graph
     """
     return graph.nodes[random.randint(0, len(graph.nodes) - 1)].coordinate
-
 def print_path(path):
     """
     Displays gps path
@@ -387,7 +390,47 @@ def print_path(path):
 ##Defines how close the robot needs to be to its destination in m for it to be considered there (tolerence)
 CLOSE_ENOUGH = 0.5
 
+def newDelivery_cb(msg):
+    """
+    This function will be called whenever there will be change in the new_delivery topic
+    """
+    cur = (msg.current_lat, msg.current_long)
+    start = (msg.start_lat, msg.start_long)
+    goal = (msg.goal_lat, msg.goal_long)
 
+    # Get graph from database
+    g = load_graph_from_database("test_lite.db")
+
+    # Find path
+    path = g.coordinate_path(cur, goal)
+
+    # Output to txt file
+    with open("delivery_waypoints.txt", "w+") as file:
+        for p in path:
+            file.write(str(p[0]) + " " + str(p[1]) + "\n")
+##For testing
+def test_newDelivery_cb():
+    """
+    Test version of newDelivery_cb
+    """
+    # Get graph from database
+    g = load_graph_from_database("test_lite.db")
+
+    cur = random_node_in_graph(g)
+    start = random_node_in_graph(g)
+    goal = random_node_in_graph(g)
+
+    # Find path
+    path = g.coordinate_path(cur, goal)
+
+    # Output to txt file
+    with open("delivery_waypoints.txt", "w+") as file:
+        for p in path:
+            file.write(str(p[0]) + " " + str(p[1]) + "\n")
+
+
+
+##For testing
 if __name__ == "__main__":
     # Get graph from database
     ##g = load_graph_from_file("test coords.txt")
@@ -416,3 +459,7 @@ if __name__ == "__main__":
 
         print("###### ROBOT ARRIVED AT DESTINATION ######")
         break
+else:   ##ROS stuff
+    rospy.init_node('mpdr/global_planner')
+    gpsSub = rospy.Subscriber('new_delivery', DeliveryInfo, newDelivery_cb)
+    rospy.spin()
