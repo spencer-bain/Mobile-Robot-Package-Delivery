@@ -124,38 +124,18 @@
       // Update lastPosition to currentPosition
     }
 
-    function submitClick() {
-      // Get submitted data of receiver
-      var receiverFName = document.getElementById("fname").value
-      var receiverLName = document.getElementById("lname").value
-      var receiverEmail = document.getElementById("email").value
-      console.log(receiverFName);
-      console.log(receiverLName);
-      console.log(receiverEmail);
-
-      var status = getStatus();
-      if(status == 0){
-        // Run SQL queries
-        alert("Ready for delivery");
-      }
-      else{
-        alert("Error: Robot is not ready");
-      }
-
-    }
-
     function getCoordFromLocation(location){
       if (location === "NW"){
-        location = "44.566213, -123.279874";
+        location = "44.566213,-123.279874";
         return location;
       }else if (location === "NE"){
-        location = "44.566215, -123.477897";
+        location = "44.566215,-123.477897";
         return location;
       }else if (location === "SE"){
-        location = "44.566252, -123.277948";
+        location = "44.566252,-123.277948";
         return location;
       }else if (location === "SW"){
-        location = "44.565269, -123.279874";
+        location = "44.565269,-123.279874";
         return location;
       }else{
         return NULL;
@@ -188,11 +168,43 @@
         senderLocation = getCoordFromLocation(senderLocation);
         receiverLocation = getCoordFromLocation(receiverLocation);
         // Get coordinates to global planner
-        
+
       } else{
         alert("Not authorized");
       }
     }
+    </script>
+
+    <script type="text/text/javascript" type"text/javascript">
+      // Connect to ROS for global planner
+      var ros = new ROSLIB.Ros({
+        url : 'ws://localhost:9090'
+      });
+
+      ros.on('connection', function() {
+         console.log('Connected to websocket server.');
+      });
+
+       ros.on('error', function(error) {
+         console.log('Error connecting to websocket server: ', error);
+      });
+
+       ros.on('close', function() {
+         console.log('Connection to websocket server closed.');
+       });
+
+       // Publish topic
+       var cmdVel = new ROSLIB.Topic({
+         ros : ros,
+         name : '/new_delivery'
+         messageType : 'std_msgs/String'  // Work with Qusai
+       });
+
+       var String = new ROSLIB.Message({
+         // Message should be current location (lineCoords[0])
+         // Start location (senderLocation)
+         // Receiver location (receiverLocation)
+       })
     </script>
 
     <div class="sendAndReceive">
@@ -277,8 +289,6 @@
         // Coordinates pulled from GPS module
         lat = payload.message.lat;
         lng = payload.message.lng;
-
-        // Upload lat and lng to database
 
         // Follow the new location on the map
         map.setCenter({lat:lat, lng:lng, alt:0});
