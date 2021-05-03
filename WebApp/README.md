@@ -3,6 +3,6 @@ This is a repository for our mobile robot package delivery group. Our group is a
 
 # How to test
 sudo apt install nodejs  
-pip3 install 'pubnub>=4.1.2'
-python3 -m http.server
+pip3 install 'pubnub>=4.1.2'  
+python3 -m http.server  
 go to localhost:8000  
