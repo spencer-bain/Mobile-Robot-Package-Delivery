@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find rplidar_ros)/launch/rplidar_s1.launch">
+    </include>
+    <node name="encoders" pkg="mpdr" type="odom.py" />
+    <node name="movement_manager" pkg="mpdr" type="ros_moving_wheels2.py" />
+    <node name="bump_boi" pkg="mpdr" type="bump_sensor_publisher.py" />
+</launch>

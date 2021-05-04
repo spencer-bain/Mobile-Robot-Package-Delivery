@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+
+<launch>
+    <include file="$(find rplidar_ros)/launch/rplidar_s1.launch">
+    </include>
+
+    <!-- Commenting out the GPS and IMU sensors  -->
+    <!--
+    <include file="$(find ublox_gps)/launch/ublox_device.launch">
+    </include>
+
+    <include file="$(find ros_bno08x)/launches/bno08x.launch">
+    </include>
+    -->
+
+</launch>
