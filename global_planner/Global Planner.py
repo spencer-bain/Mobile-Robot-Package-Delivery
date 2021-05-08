@@ -1,8 +1,10 @@
+#!/usr/bin/env python3
 ##Code assumes robot is in Northern and Western hemispheres
 
 from math import sin, cos, sqrt, atan2, radians, inf, ceil
 import heapq
 import time
+import os.path
 
 ##GPS coordinate calclations
 from geographiclib.geodesic import Geodesic
@@ -12,8 +14,10 @@ import sqlite3
 from sqlite3 import Error
 
 ##ROS stuff only if in ros
-if __name__ != "__main__":
-    import rospy
+import rospy
+from gp_test.msg import DeliveryInfo
+from gp_test.msg import Coordinate
+from gp_test.msg import Path
 
 ##For testing
 import random
@@ -390,6 +394,9 @@ def print_path(path):
 ##Defines how close the robot needs to be to its destination in m for it to be considered there (tolerence)
 CLOSE_ENOUGH = 0.5
 
+##Publishes path to "new_path" topic
+pathPub = rospy.Publisher('new_path', Path, queue_size=1)
+
 def newDelivery_cb(msg):
     """
     This function will be called whenever there will be change in the new_delivery topic
@@ -399,22 +406,35 @@ def newDelivery_cb(msg):
     goal = (msg.goal_lat, msg.goal_long)
 
     # Get graph from database
-    g = load_graph_from_database("test_lite.db")
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(BASE_DIR, "test_lite.db")
+    g = load_graph_from_database(db_path)
 
     # Find path
-    path = g.coordinate_path(cur, goal)
+    path = g.coordinate_path(start, goal)
 
     # Output to txt file
     with open("delivery_waypoints.txt", "w+") as file:
         for p in path:
             file.write(str(p[0]) + " " + str(p[1]) + "\n")
+    
+    # Publish to "new_path" topic        
+    path_to_topic = Path()
+    for p in path:
+        c = Coordinate()
+        c.lat = p[0]
+        c.long = p[1]
+        path_to_topic.coordinates.append(c)
+    pathPub.publish(path_to_topic)
 ##For testing
 def test_newDelivery_cb():
     """
     Test version of newDelivery_cb
     """
     # Get graph from database
-    g = load_graph_from_database("test_lite.db")
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+    db_path = os.path.join(BASE_DIR, "test_lite.db")
+    g = load_graph_from_database(db_path)
 
     cur = random_node_in_graph(g)
     start = random_node_in_graph(g)
@@ -430,36 +450,8 @@ def test_newDelivery_cb():
 
 
 
-##For testing
-if __name__ == "__main__":
-    # Get graph from database
-    ##g = load_graph_from_file("test coords.txt")
-    g = load_graph_from_database("test_lite.db")
-    # Create simulator (for testing)
-    robot = movement_simulator(g.get_min_lat(), g.get_max_lat(), g.get_min_long(), g.get_max_long())
 
-    # Run until power off
-    while True:
-        goal = random_node_in_graph(g)
-        path = g.coordinate_path(robot.get_current_gps_coords(), goal)
-        print_path(path)
-        current_sub_goal = 0
-        robot.set_goal(path[current_sub_goal])
-
-        while True:
-            while(dist(robot.get_current_gps_coords(), path[current_sub_goal]) > CLOSE_ENOUGH):
-                ##Simulate robot moving over time
-                robot.move()
-                ##Wait before checking again
-                time.sleep(1)
-            current_sub_goal += 1
-            if current_sub_goal >= len(path):
-                break
-            robot.set_goal(path[current_sub_goal])
-
-        print("###### ROBOT ARRIVED AT DESTINATION ######")
-        break
-else:   ##ROS stuff
-    rospy.init_node('mpdr/global_planner')
-    gpsSub = rospy.Subscriber('new_delivery', DeliveryInfo, newDelivery_cb)
-    rospy.spin()
+rospy.init_node('mpdr-global_planner')
+gpsSub = rospy.Subscriber('new_delivery', DeliveryInfo, newDelivery_cb)
+rospy.spin()
+    

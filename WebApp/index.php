@@ -13,6 +13,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width">
     <script src="https://cdn.pubnub.com/sdk/javascript/pubnub.4.19.0.min.js"></script>
+    <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/nipplejs/0.7.3/nipplejs.js"></script>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style1.css">
@@ -89,6 +91,48 @@
     ?>
 
     <script>
+    var ros = new ROSLIB.Ros({
+        url : 'ws://localhost:9090'
+    });
+
+    ros.on('connection', function() {
+         console.log('Connected to websocket server.');
+    });
+
+    ros.on('error', function(error) {
+         console.log('Error connecting to websocket server: ', error);
+    });
+
+    ros.on('close', function() {
+         console.log('Connection to websocket server closed.');
+    });
+    
+    var path_listener = new ROSLIB.Topic({
+        ros: ros,
+        name: '/new_path',
+        messageType: 'gp_test/Path'
+    });
+
+    path_listener.subscribe(function (m) {
+        // var pnchannel = "raspi-tracker";
+        // pubnub.subscribe({channels: [pnchannel]});
+        // pubnub.addListener({message: redraw});
+        console.log("DRAW START");
+        var new_path = [];
+        for (var i = 0; i < m.coordinates.length; i++) {
+            var np = {lat: m.coordinates[i].lat, lng: m.coordinates[i].long}
+            // pubnub.publish({channel:pnchannel, np});
+            new_path.push(new google.maps.LatLng(np.lat, np.lng));
+        }
+        var lineCoordinatesPath = new google.maps.Polyline({
+            path: new_path,
+            geodesic: true,
+            strokeColor: '#24fff8'
+        });
+        lineCoordinatesPath.setMap(map);
+        console.log("DRAW END");
+    });
+      
     function getStatus() {
       // 0 = Ready for Delivery
       // 1 = On Delivery
@@ -124,24 +168,25 @@
       // Update lastPosition to currentPosition
     }
 
-    function submitClick() {
-      // Get submitted data of receiver
-      var receiverFName = document.getElementById("fname").value
-      var receiverLName = document.getElementById("lname").value
-      var receiverEmail = document.getElementById("email").value
-      console.log(receiverFName);
-      console.log(receiverLName);
-      console.log(receiverEmail);
-
-      var status = getStatus();
-      if(status == 0){
-        // Run SQL queries
-        alert("Ready for delivery");
+    function getCoordFromLocation(location){
+      if (location === "NW"){
+        location = "44.56620989854069,-123.27986681438706";
+        return location;
+      }else if (location === "NE"){
+        location = "44.56621596508787,-123.27788935771436";
+        return location;
+      }else if (location === "SE"){
+        location = "44.565257994343455,-123.27790160582192";
+        return location;
+      }else if (location === "SW"){
+        location = "44.56527081121918,-123.27986799604192";
+        return location;
+      }else if (location === "Mid"){
+        location = "44.56573665661425,-123.27898745497953";
+        return location;
+      }else{
+        return NULL;
       }
-      else{
-        alert("Error: Robot is not ready");
-      }
-
     }
 
     function auth(){
@@ -160,9 +205,38 @@
       }
       if(flag == 1){
         alert("Selection aurthorized");
-        var receiverFname = document.getElementById("Fname").value
-        var receiveLname = document.getElementById("Lname").value
-        var receiverLocation = document.getElementById("locations").value
+        // Get inputs
+        var receiverFname = document.getElementById("fname").value
+        var receiveLname = document.getElementById("lname").value
+        // Get location inputs
+        var senderLocation = document.getElementById("SenderLocations").value
+        var receiverLocation = document.getElementById("ReceiverLocation").value
+        // Convert locations to coordinates (lat, lng)
+        senderLocation = getCoordFromLocation(senderLocation);
+        receiverLocation = getCoordFromLocation(receiverLocation);
+        // Get coordinates to global planner
+        // Publish topic
+        var cmdVel = new ROSLIB.Topic({
+          ros : ros,
+          name : '/new_delivery',
+          messageType : 'gp_test/DeliveryInfo' 
+        });
+       
+        var start = senderLocation.split(',');
+        var end = receiverLocation.split(',');
+        //current_lat : lineCoords[0].getPosition().lat(),
+        //current_long : lineCoords[0].getPosition().lng(),
+        var msg = new ROSLIB.Message({
+          current_lat : parseFloat(start[0]),
+          current_long : parseFloat(start[1]),
+          start_lat : parseFloat(start[0]), 
+          start_long : parseFloat(start[1]),
+          goal_lat : parseFloat(end[0]), 
+          goal_long : parseFloat(end[1])
+        })
+       
+        cmdVel.publish(msg);
+       
       } else{
         alert("Not authorized");
       }
@@ -172,25 +246,28 @@
     <div class="sendAndReceive">
       <h1>Sender Selection</h1>
       <p>Please select your location</p>
-      <input list="SenderLocations">
-      <datalist id="SenderLocations">
-        <option value="NW">
-        <option value="SW">
-        <option value="SE">
-        <option value="NE">
-      </datalist>
+      <label for="SenderLocations">Select a location:</label>
+      <select name="SenderLocations" id="SenderLocations">
+        <option value="NW">NW</option>
+        <option value="SW">SW</option>
+        <option value="SE">SE</option>
+        <option value="NE">NE</option>
+        <option value="Mid">Mid</option>
+      </select>
+
       <h1>Receiver Selection</h1>
       <p>Please enter a receiver</p>
       <input type="text" id="fname" name="fname" placeholder="First Name">
       <input type="text" id="lname" name="lname" placeholder="Last Name">
       <input type="text" id="email" name="email" placeholder="Email">
-      <input list="locations">
-      <datalist id="locations">
-        <option value="NW">
-        <option value="SW">
-        <option value="SE">
-        <option value="NE">
-      </datalist>
+      <label for="ReceiverLocation">Select a location:</label>
+      <select name="SenderLocations" id="ReceiverLocation">
+        <option value="NW">NW</option>
+        <option value="SW">SW</option>
+        <option value="SE">SE</option>
+        <option value="NE">NE</option>
+        <option value="Mid">Mid</option>
+      </select>
       <input type="submit" id="submitBtn"  onclick="auth()" value="Submit">
     </div>
 
@@ -232,15 +309,15 @@
 
     // Create the first map with a marker
     var initialize = function()
-    {
-      map = new google.maps.Map(document.getElementById('map-canvas'), {center:{lat:lat,lng:lng},zoom:12});
-      mark = new google.maps.Marker({position:{lat:lat, lng:lng}, map:map});
+    {map
+      map = new google.maps.Map(document.getElementById('map-canvas'), {center:{lat:lat,lng:lng},zoom:18, mapTypeId: "satellite"});
+      //mark = new google.maps.Marker({position:{lat:lat, lng:lng}, map:map});
     };
 
     window.initialize = initialize;
 
     // Resizing
-    google.maps.addDomListener(window, resize, initialize);
+    // google.maps.addDomListener(window, resize, initialize);
 
     // Function to update the map
     var redraw = function(payload)
@@ -250,8 +327,6 @@
         // Coordinates pulled from GPS module
         lat = payload.message.lat;
         lng = payload.message.lng;
-
-        // Upload lat and lng to database
 
         // Follow the new location on the map
         map.setCenter({lat:lat, lng:lng, alt:0});
