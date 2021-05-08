@@ -245,5 +245,57 @@
     <!-- Movement Buttons-->
     <div id="zone_joystick"></div>
 
+    <button id="imu_btn">Get IMU Data</button>
+    <table>
+      <tr>X
+        <td id="a1">mag_x</td>
+        <td id="a2">ang_x</td>
+        <td id="a3">linear_x</td>
+        <td id="a4">ori_x</td>
+      </tr>
+    </table>
+
+
+
+    <script>
+    var updateIMU = function(payload){
+      if(payload.message.ang_x){
+        ang_x = payload.message.ang_x;
+        linear_x = payload.message.linear_x;
+        ori_x = payload.message.ori_x;
+
+        document.getElementById("a2").innerHTML = ang_x;
+        document.getElementById("a3").innerHTML = linear_x;
+        document.getElementById("a4").innerHTML = ori_x;
+      }else{
+        alert("Couldn't get data from pubnub");
+      }
+    };
+
+    var pnChannel = "imu_data";
+    var pubnub = new PubNub({
+      publishKey: 'pub-c-74e6b463-6ec6-4cea-9eb6-9f692a6506a0',
+      subscribeKey: 'sub-c-efdc1f2e-2aa6-11eb-9713-12bae088af96'
+    });
+
+    document.querySelector('#imu_btn').addEventListener('click', function(){
+      var text = document.getElementById("imu_btn").textContent;
+      if (text == "Get IMU Data"){
+        pubnub.subscribe({channels: [pnChannel]});
+        pubnub.addListener({message:updateIMU});
+        document.getElementById("imu_btn").classList.add('btn-danger');
+        document.getElementById("imu_btn").classList.remove('btn-success');
+        // Change "Start Tracking" to "Stop Tracking"
+        document.getElementById("imu_btn").textContent = 'Stop IMU data';
+      }else{
+        // Disconnect from pubnub
+        pubnub.unsubscribe({channels: [pnChannel]});
+        document.getElementById("imu_btn").classList.remove('btn-danger');
+        document.getElementById("imu_btn").classList.add('btn-success');
+        document.getElementById("imu_btn").textContent = 'Start Tracking';
+      }
+    });
+    </script>
+
   </body>
 </html>
