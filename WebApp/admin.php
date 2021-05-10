@@ -125,7 +125,7 @@
     <div class="bar">
       <h2 id="statusNotifcation">Status: Offline</h2>
       <button id="Login"><a href="/">Login</a></button>
-      <button id="adminButton"><a href="/admin.html">Admin</a></button>
+      <button id="adminButton"><a href="/admin.php">Admin</a></button>
       <button id="updateStatus" onclick="updateStatus()">Update Status</button>
     </div>
 
@@ -293,9 +293,23 @@
       subscribeKey: 'sub-c-efdc1f2e-2aa6-11eb-9713-12bae088af96'
     });
 
-    document.querySelector('#imu_button').addEventListener('click', function(){
-      pubnub.subscribe({channels: [pnChannel]});
-      pubnub.addListener({message:update_imu});
+    // Get button text
+    document.querySelector('#imu_btn').addEventListener('click', function(){
+      var text = document.getElementById("imu_button").textContent;
+      if (text == "Get IMU Data"){
+        pubnub.subscribe({channels: [pnChannel]});
+        pubnub.addListener({message:update_imu});
+        document.getElementById("imu_btn").classList.add('btn-danger');
+        document.getElementById("imu_btn").classList.remove('btn-success');
+        // Change "Start Tracking" to "Stop Tracking"
+        document.getElementById("imu_btn").textContent = 'Stop IMU data';
+      }else{
+        // Disconnect from pubnub
+        pubnub.unsubscribe({channels: [pnChannel]});
+        document.getElementById("imu_btn").classList.remove('btn-danger');
+        document.getElementById("imu_btn").classList.add('btn-success');
+        document.getElementById("imu_btn").textContent = 'Get IMU Data';
+      }
     });
 
     var update_imu = function update(payload){
@@ -336,46 +350,5 @@
     document.getElementById("d4").innerHTML = ori_w;
     };
     </script>
-
-    <!-- <script>
-    var updateIMU = function(payload){
-      if(payload.message.ang_x){
-        ang_x = payload.message.ang_x;
-        linear_x = payload.message.linear_x;
-        ori_x = payload.message.ori_x;
-
-        document.getElementById("a2").innerHTML = ang_x;
-        document.getElementById("a3").innerHTML = linear_x;
-        document.getElementById("a4").innerHTML = ori_x;
-      }else{
-        alert("Couldn't get data from pubnub");
-      }
-    };
-
-    var pnChannel = "imu_data";
-    var pubnub = new PubNub({
-      publishKey: 'pub-c-74e6b463-6ec6-4cea-9eb6-9f692a6506a0',
-      subscribeKey: 'sub-c-efdc1f2e-2aa6-11eb-9713-12bae088af96'
-    });
-
-    document.querySelector('#imu_btn').addEventListener('click', function(){
-      var text = document.getElementById("imu_btn").textContent;
-      if (text == "Get IMU Data"){
-        pubnub.subscribe({channels: [pnChannel]});
-        pubnub.addListener({message:updateIMU});
-        document.getElementById("imu_btn").classList.add('btn-danger');
-        document.getElementById("imu_btn").classList.remove('btn-success');
-        // Change "Start Tracking" to "Stop Tracking"
-        document.getElementById("imu_btn").textContent = 'Stop IMU data';
-      }else{
-        // Disconnect from pubnub
-        pubnub.unsubscribe({channels: [pnChannel]});
-        document.getElementById("imu_btn").classList.remove('btn-danger');
-        document.getElementById("imu_btn").classList.add('btn-success');
-        document.getElementById("imu_btn").textContent = 'Start Tracking';
-      }
-    });
-    </script> -->
-
   </body>
 </html>
