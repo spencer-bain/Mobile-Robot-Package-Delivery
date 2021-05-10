@@ -242,6 +242,101 @@
     mysqli_close($db_conn);
     ?>
 
+    <!-- IMU table -->
+    <div id="imu_msg">
+    <br>
+      <button id="imu_button">Get data</button><br>
+      <table border = '1'>
+        <tr>
+          <th></th>
+          <th>mag</th>
+          <th>ang</th>
+          <th>linear</th>
+          <th>ori</th>
+        </tr>
+        <tr>
+          <th>X</th>
+          <td id="a1">mag_x</td>
+          <td id="a2">ang_x</td>
+          <td id="a3">linear_x</td>
+          <td id="a4">ori_x</td>
+        </tr>
+        <tr>
+          <th>Y</th>
+          <td id="b1">mag_y</td>
+          <td id="b2">ang_y</td>
+          <td id="b3">linear_x</td>
+          <td id="b4">linear_x</td>
+        </tr>
+        <tr>
+          <th>Z</th>
+          <td id="c1">mag_z</td>
+          <td id="c2">ang_z</td>
+          <td id="c3">linear_z</td>
+          <td id="c4">ori_z</td>
+        </tr>
+        <tr>
+          <th>W</th>
+          <td></td>
+          <td></td>
+          <td></td>
+          <td id="d4">ori_w</td>
+        </tr>
+      </table>
+    </div>
+
+    <script>
+    // Connect to pubnub
+    var pnChannel = "imu_data";
+    var pubnub = new PubNub({
+      publishKey: 'pub-c-74e6b463-6ec6-4cea-9eb6-9f692a6506a0',
+      subscribeKey: 'sub-c-efdc1f2e-2aa6-11eb-9713-12bae088af96'
+    });
+
+    document.querySelector('#imu_button').addEventListener('click', function(){
+      pubnub.subscribe({channels: [pnChannel]});
+      pubnub.addListener({message:update_imu});
+    });
+
+    var update_imu = function update(payload){
+    // Get data from pubnub
+    mag_x = payload.message.mag_x;
+    mag_y = payload.message.mag_y;
+    mag_z = payload.message.mag_z;
+
+    ang_x = payload.message.ang_x;
+    ang_y = payload.message.ang_x;
+    ang_z = payload.message.ang_x;
+
+    linear_x = payload.message.linear_x;
+    linear_y = payload.message.linear_y;
+    linear_z = payload.message.linear_z;
+
+    ori_x = payload.message.ori_x;
+    ori_y = payload.message.ori_y;
+    ori_z = payload.message.ori_z;
+    ori_w = payload.message.ori_w;
+
+    // Update table with new data
+    document.getElementById("a1").innerHTML = mag_x;
+    document.getElementById("a2").innerHTML = ang_x;
+    document.getElementById("a3").innerHTML = linear_x;
+    document.getElementById("a4").innerHTML = ori_x;
+
+    document.getElementById("b1").innerHTML = mag_y;
+    document.getElementById("b2").innerHTML = ang_y;
+    document.getElementById("b3").innerHTML = linear_y;
+    document.getElementById("b4").innerHTML = ori_y;
+
+    document.getElementById("c1").innerHTML = mag_z;
+    document.getElementById("c2").innerHTML = ang_z;
+    document.getElementById("c3").innerHTML = linear_z;
+    document.getElementById("c4").innerHTML = ori_z;
+
+    document.getElementById("d4").innerHTML = ori_w;
+    };
+    </script>
+
     <!-- Movement Buttons-->
     <div id="zone_joystick"></div>
 
