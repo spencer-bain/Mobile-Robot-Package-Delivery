@@ -337,22 +337,7 @@
     };
     </script>
 
-    <!-- Movement Buttons-->
-    <div id="zone_joystick"></div>
-
-    <button id="imu_btn">Get IMU Data</button>
-    <table>
-      <tr>X
-        <td id="a1">mag_x</td>
-        <td id="a2">ang_x</td>
-        <td id="a3">linear_x</td>
-        <td id="a4">ori_x</td>
-      </tr>
-    </table>
-
-
-
-    <script>
+    <!-- <script>
     var updateIMU = function(payload){
       if(payload.message.ang_x){
         ang_x = payload.message.ang_x;
@@ -390,7 +375,7 @@
         document.getElementById("imu_btn").textContent = 'Start Tracking';
       }
     });
-    </script>
+    </script> -->
 
   </body>
 </html>
