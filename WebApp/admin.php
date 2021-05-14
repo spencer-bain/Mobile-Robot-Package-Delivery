@@ -350,5 +350,59 @@
     document.getElementById("d4").innerHTML = ori_w;
     };
     </script>
+
+    <!-- Table with GPS data -->
+    <div id="gps_msg">
+    <br>
+      <button id="gps_btn">Get GPS data</button><br>
+      <table border = '1'>
+        <tr>
+          <th>Latitude</th>
+          <th>Longitude</th>
+        </tr>
+        <td id="lat1">lat</td>
+        <td id="lng1">lng</td>
+      </table>
+    </div>
+
+    <script>
+    var update_gps = function(payload){
+      if(payload.message.lat){
+        lat = payload.message.lat;
+        lng = payload.message.lng;
+
+        document.getElementById("lat1").innerHTML = lat;
+        document.getElementById("lng1").innerHTML = lng;
+      }
+    };
+
+    // Connect to pubnub
+    var pnChannel = "raspi-tracker";
+    var pubnub = new PubNub({
+      publishKey: 'pub-c-74e6b463-6ec6-4cea-9eb6-9f692a6506a0',
+      subscribeKey: 'sub-c-efdc1f2e-2aa6-11eb-9713-12bae088af96'
+    });
+
+    // Listen for "Start Tracking" button click
+    document.querySelector('#gps_btn').addEventListener('click', function(){
+      var text = document.getElementById("gps_btn").textContent;
+      if(text == "Get GPS data"){
+        // Connect to pubnub and update coordinates
+        pubnub.subscribe({channels: [pnChannel]});
+        pubnub.addListener({message:update_gps});
+        document.getElementById("gps_btn").classList.add('btn-danger');
+        document.getElementById("gps_btn").classList.remove('btn-success');
+        // Change "Start Tracking" to "Stop Tracking"
+        document.getElementById("gps_btn").textContent = 'Stop Tracking';
+      }
+      else{
+        // Disconnect from pubnub
+        pubnub.unsubscribe({channels: [pnChannel]});
+        document.getElementById("gps_btn").classList.remove('btn-danger');
+        document.getElementById("gps_btn").classList.add('btn-success');
+        document.getElementById("gps_btn").textContent = 'Get GPS data';
+      }
+    });
+    </script>
   </body>
 </html>
