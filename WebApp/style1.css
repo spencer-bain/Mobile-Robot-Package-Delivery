@@ -209,3 +209,12 @@ h1{
 .cancel-container button {
   background-color: maroon;
 }
+
+#zone_joystick{
+
+	position: absolute;
+
+	margin-top: -25vh;
+
+	margin-left: 50vw;
+}

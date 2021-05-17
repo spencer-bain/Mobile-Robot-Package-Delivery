@@ -4,8 +4,8 @@
 // Go to localhost:8000
 
 $db_host = '127.0.0.1';
-$db_user = "root";        // User of database ("Leon" on Hanna's Pi)
-$db_password = "pwd";     // Password of database (Hanna's Pi password)
+$db_user = "leon";        // User of database ("Leon" on Hanna's Pi)
+$db_password = "0252558";     // Password of database (Hanna's Pi password)
 $db_name = "mydatabase";
 $db_port = '3306';
 
